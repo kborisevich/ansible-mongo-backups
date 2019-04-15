@@ -1,18 +1,10 @@
-- name: Copy creating mongo backup and removing old backups scripts to production server
-  sudo: yes
-  copy: src=files/{{ item.src }} dest={{ item.dest }} owner=root mode=744
-  with_items:
-    - {src: 'files/backup-mongodb.sh', dest: '/usr/sbin/backup-mongodb.sh'}
-    - {src: 'files/remove-old-backups.sh', dest: '/usr/sbin/remove-old-backups.sh'}
+- name: Add mongo container to inventory
+  add_host:
+    name: mongo_container
+    ansible_host: ship_mongo_1
+    ansible_connection: docker
+    ansible_user: root
+  changed_when: false
 
-- name: Create backup cron job
-  sudo: yes
-  cron: name="mongodb backup in {{ env }}"
-    minute="0" hour="0" day="*" month="*" weekday="*"
-    job="/usr/sbin/backup-mongodb.sh {{ mongodump_path }} {{ mongo_host }} {{ mongo_port }} {{ db_name }} {{ aws_bucket }}"
-
-- name: Create remove old backups cron job
-  sudo: yes
-  cron: name="remove mongodb backups in {{ env }}"
-    minute="0" hour="0" day="1" month="*" weekday="*"
-    job="/usr/sbin/remove-old-backups.sh {{ mongodump_path }} {{ mongo_host }} {{ mongo_port }} {{ db_name }} { aws_busket }}"
+- name: Backup mongodb
+  import_tasks: backup-mongodb.yml

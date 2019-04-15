@@ -1,0 +1,19 @@
+- fail: msg="You must define mongodump_path, mongo_host, mongo_port and aws_bucket"
+  when: mongodump_path is not defined
+    mongo_host is not defined or 
+    mongo_port is not defined or
+    aws_bucket is not defined
+
+- name: Copy creating mongo backup and removing old backups scripts to production server
+  delegate_to: mongo_container
+  copy: src=files/{{ item.src }} dest={{ item.dest }} owner=root mode=744
+  with_items:
+    - {src: 'files/backup-mongodb.sh', dest: '/usr/sbin/backup-mongodb.sh'}
+    - {src: 'files/remove-old-backups.sh', dest: '/usr/sbin/remove-old-backups.sh'}
+
+- name: Create backup cron job
+  delegate_to: mongo_container
+  sudo: yes
+  cron: name="mongodb backup in {{ env }}"
+    minute="0" hour="0" day="*" month="*" weekday="*"
+    job="/usr/sbin/backup-mongodb.sh {{ mongodump_path }} {{ mongo_host }} {{ mongo_port }} {{ db_name }} {{ aws_bucket }}"
