@@ -2,14 +2,14 @@
   sudo: yes
   copy: src=files/{{ item.src }} dest={{ item.dest }} owner=root mode=744
   with_items:
-    - {src: 'files/mongodb_backup.sh', dest: '/usr/sbin/mongodb_backup.sh'}
+    - {src: 'files/backup-mongodb.sh', dest: '/usr/sbin/backup-mongodb.sh'}
     - {src: 'files/remove-old-backups.sh', dest: '/usr/sbin/remove-old-backups.sh'}
 
 - name: Create backup cron job
   sudo: yes
   cron: name="mongodb backup in {{ env }}"
     minute="0" hour="0" day="*" month="*" weekday="*"
-    job="/usr/sbin/mongodb_backup.sh {{ mongodump_path }} {{ mongo_host }} {{ mongo_port }} {{ db_name }} {{ aws_busket }}"
+    job="/usr/sbin/backup-mongodb.sh {{ mongodump_path }} {{ mongo_host }} {{ mongo_port }} {{ db_name }} {{ aws_bucket }}"
 
 - name: Create remove old backups cron job
   sudo: yes
