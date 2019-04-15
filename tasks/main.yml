@@ -1,10 +1,2 @@
-- name: Add mongo container to inventory
-  add_host:
-    name: mongo_container
-    ansible_host: ship_mongo_1
-    ansible_connection: docker
-    ansible_user: root
-  changed_when: false
-
-- name: Backup mongodb
-  import_tasks: backup-mongodb.yml
+- name: Install s3cmd
+  import_tasks: s3cmd.yml
