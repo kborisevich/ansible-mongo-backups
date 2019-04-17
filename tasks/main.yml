@@ -1,2 +1,5 @@
 - name: Install s3cmd
   import_tasks: s3cmd.yml
+
+- name: Backup mongodb
+  import_tasks: backup-mongodb.yml
