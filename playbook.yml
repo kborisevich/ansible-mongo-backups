@@ -1,0 +1,24 @@
+- hosts:
+  gather_facts: no
+  remote_user: root
+  pre_tasks:
+    - name: 'update'
+      raw: apt-get update
+    - name: 'install python2 and curl'
+      raw: apt-get -y install python curl
+    - name: 'install docker'
+      raw: curl -fsSL https://get.docker.com | sh
+  tasks:
+    - name: upload current directory to the docker host
+      synchronize:
+        src: "."
+        dest: "/tmp"
+    - name: build mongo-backups image
+      raw: docker build -t mongo-s3-backups /tmp/ansible-mongo-backups
+    - name: run mongo-backups container
+      raw: docker run --env MONGO_CONNECTION_STRING={{ MONGO_CONNECTION_STRING }} --env S3_ACCESS_KEY={{ S3_ACCESS_KEY }} --env S3_SECRET_KEY={{ S3_SECRET_KEY }} --env S3_BUCKET={{ S3_BUCKET }} mongo-s3-backups
+  vars:
+    MONGO_CONNECTION_STRING:
+    S3_ACCESS_KEY:
+    S3_SECRET_KEY:
+    S3_BUCKET:
